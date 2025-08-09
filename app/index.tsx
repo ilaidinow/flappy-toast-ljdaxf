@@ -1,63 +1,63 @@
-import { Text, View, Image, SafeAreaView } from 'react-native';
-import { router } from 'expo-router';
-import { useState, useEffect } from 'react';
-import Button from '../components/Button';
-import { commonStyles, buttonStyles } from '../styles/commonStyles';
 
-// Declare the window properties we're using
-declare global {
-  interface Window {
-    handleInstallClick: () => void;
-    canInstall: boolean;
-  }
-}
+import { Text, View, Image, Platform, ScrollView } from 'react-native';
+import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import Button from '../components/Button';
+import { commonStyles, buttonStyles, colors } from '../styles/commonStyles';
+import { getHighScore } from '../utils/storage';
 
 export default function MainScreen() {
-  const [canInstall, setCanInstall] = useState(false);
+  const [highScore, setHighScore] = useState<number>(0);
 
   useEffect(() => {
-    // Initial check
-    setCanInstall(false);
-
-    // Set up polling interval
-    const intervalId = setInterval(() => {
-      if(window.canInstall) {
-        setCanInstall(true);
-        clearInterval(intervalId);
-      }
-    }, 500);
-
-    // Cleanup
-    return () => {
-      clearInterval(intervalId);
-    };
+    (async () => {
+      const hs = await getHighScore();
+      setHighScore(hs);
+    })();
   }, []);
 
   return (
     <View style={commonStyles.container}>
-      <View style={commonStyles.content}>
+      <ScrollView contentContainerStyle={[commonStyles.content, { paddingVertical: 32 }]} bounces={false}>
         <Image
-          source={require('../assets/images/final_quest_240x240.png')}
-          style={{ width: 180, height: 180 }}
+          source={require('../assets/images/natively-dark.png')}
+          style={{ width: 140, height: 140, marginBottom: 12, tintColor: undefined }}
           resizeMode="contain"
         />
-        <Text style={commonStyles.title}>This is a placeholder app.</Text>
-        <Text style={commonStyles.text}>Your app will be displayed here when it's ready.</Text>
-        <View style={commonStyles.buttonContainer}>
-          {canInstall && (
-            <Button
-              text="Install App"
-              onPress={() => {
-                if(window.handleInstallClick) {
-                  window.handleInstallClick();
-                  setCanInstall(false); // Update state after installation
-                }
-              }}
-              style={buttonStyles.instructionsButton}
-            />
-          )}
+        <Text style={commonStyles.title}>Flappy Toast</Text>
+        <View style={commonStyles.card}>
+          <Text style={commonStyles.text}>A cute, toasty arcade adventure. Tap to hop your toast and dodge incoming toasters!</Text>
         </View>
-      </View>
+
+        <View style={[commonStyles.card, { backgroundColor: colors.backgroundAlt }]}>
+          <Text style={[commonStyles.text, { fontSize: 16 }]}>
+            Controls:
+          </Text>
+          <Text style={commonStyles.text}>- Tap anywhere to jump</Text>
+          <Text style={commonStyles.text}>- {Platform.OS === 'web' ? 'Press Space or Arrow Up to jump (web)' : 'Supports haptics on mobile'}</Text>
+        </View>
+
+        <View style={{ width: '100%', marginTop: 8 }}>
+          <Button
+            text="Play"
+            onPress={() => router.push('/game')}
+            style={buttonStyles.primary}
+          />
+          <Button
+            text={`High Score: ${highScore}`}
+            onPress={() => {}}
+            style={[buttonStyles.secondary, { marginTop: 10 }]}
+            textStyle={{ color: '#4A350D' }}
+          />
+        </View>
+
+        <View style={[commonStyles.card, { marginTop: 16 }]}>
+          <Text style={[commonStyles.text, { fontSize: 16 }]}>Tips:</Text>
+          <Text style={commonStyles.text}>- Keep a steady rhythm.</Text>
+          <Text style={commonStyles.text}>- Use small hops to thread the gap!</Text>
+          <Text style={commonStyles.text}>- You have 3 lives, so do not panic!</Text>
+        </View>
+      </ScrollView>
     </View>
   );
 }

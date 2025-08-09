@@ -1,24 +1,33 @@
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
+
+import { StyleSheet } from 'react-native';
 
 export const colors = {
-  primary: '#162456',    // Material Blue
-  secondary: '#193cb8',  // Darker Blue
-  accent: '#64B5F6',     // Light Blue
-  background: '#101824',  // Keeping dark background
-  backgroundAlt: '#162133',  // Keeping dark background
-  text: '#e3e3e3',       // Keeping light text
-  grey: '#90CAF9',       // Light Blue Grey
-  card: '#193cb8',       // Keeping dark card background
+  // Cute, hand-drawn palette
+  background: '#F5F5DC', // Beige like toast
+  backgroundAlt: '#FFF7E1', // Lighter cream
+  text: '#8B4513', // Dark brown
+  primary: '#FFA500', // Orange accent
+  secondary: '#FFD700', // Bright yellow accent
+  card: '#FFF1C9',
+  grey: '#B09060',
+  heart: '#FF4D6D',
+  obstacle: '#7A7A7A',
+  obstacleDark: '#4A4A4A',
 };
 
 export const buttonStyles = StyleSheet.create({
-  instructionsButton: {
+  primary: {
     backgroundColor: colors.primary,
     alignSelf: 'center',
     width: '100%',
   },
+  secondary: {
+    backgroundColor: colors.secondary,
+    alignSelf: 'center',
+    width: '100%',
+  },
   backButton: {
-    backgroundColor: colors.backgroundAlt,
+    backgroundColor: '#8B4513', // dark brown for strong contrast
     alignSelf: 'center',
     width: '100%',
   },
@@ -44,20 +53,21 @@ export const commonStyles = StyleSheet.create({
     justifyContent: 'center',
     maxWidth: 800,
     width: '100%',
+    paddingHorizontal: 24,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '800',
+    fontSize: 36,
+    fontFamily: 'Baloo2_700Bold',
     textAlign: 'center',
     color: colors.text,
-    marginBottom: 10
+    marginBottom: 10,
   },
   text: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 18,
+    fontFamily: 'Baloo2_400Regular',
     color: colors.text,
     marginBottom: 8,
-    lineHeight: 24,
+    lineHeight: 26,
     textAlign: 'center',
   },
   section: {
@@ -71,19 +81,19 @@ export const commonStyles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   card: {
-    backgroundColor: colors.backgroundAlt,
+    backgroundColor: colors.card,
     borderColor: colors.grey,
     borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
+    borderRadius: 16,
+    padding: 16,
     marginVertical: 8,
     width: '100%',
-    boxShadow: '0px 2px 3px rgba(0, 0, 0, 0.1)',
-    elevation: 2,
+    boxShadow: '0px 6px 12px rgba(0, 0, 0, 0.12)',
+    elevation: 3,
   },
   icon: {
     width: 60,
     height: 60,
-    tintColor: "white",
+    tintColor: colors.text,
   },
 });
