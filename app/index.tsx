@@ -55,7 +55,7 @@ export default function MainScreen() {
           <Text style={[commonStyles.text, { fontSize: 16 }]}>Tips:</Text>
           <Text style={commonStyles.text}>- Keep a steady rhythm.</Text>
           <Text style={commonStyles.text}>- Use small hops to thread the gap!</Text>
-          <Text style={commonStyles.text}>- You have 3 lives, so do not panic!</Text>
+          <Text style={commonStyles.text}>- One hit and you are toast!</Text>
         </View>
       </ScrollView>
     </View>

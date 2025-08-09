@@ -17,16 +17,11 @@ type ObstaclePair = {
   scored?: boolean;
 };
 
-const INITIAL_LIVES = 3;
-
 export default function GameScreen() {
   const [dims, setDims] = useState({ w: 0, h: 0 });
   const [score, setScore] = useState(0);
-  const [lives, setLives] = useState(INITIAL_LIVES);
   const [highScore, setHS] = useState<number | null>(null);
   const [running, setRunning] = useState(false);
-  const [invincible, setInvincible] = useState(false);
-  const [blink, setBlink] = useState(false);
 
   // Toast physics
   const toastWidth = 56;
@@ -58,8 +53,8 @@ export default function GameScreen() {
   }, []);
 
   const resetGame = useCallback(() => {
+    console.log('Resetting game state');
     setScore(0);
-    setLives(INITIAL_LIVES);
     obstaclesRef.current = [];
     nextIdRef.current = 1;
     spawnTimerRef.current = 0;
@@ -68,8 +63,6 @@ export default function GameScreen() {
     gapSizeRef.current = 200;
     velYRef.current = 0;
     toastYRef.current = dims.h > 0 ? dims.h * 0.4 : 200;
-    setInvincible(false);
-    setBlink(false);
     lastTsRef.current = null;
     setRunning(true);
     setTick(t => t + 1);
@@ -78,6 +71,7 @@ export default function GameScreen() {
   const endGame = useCallback(async () => {
     setRunning(false);
     const finalScore = score;
+    console.log('Ending game. Final score:', finalScore);
     if (typeof highScore === 'number') {
       if (finalScore > highScore) {
         await setHighScore(finalScore);
@@ -92,6 +86,7 @@ export default function GameScreen() {
 
   const onLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
+    console.log('Layout dimensions:', width, height);
     setDims({ w: width, h: height });
   };
 
@@ -138,6 +133,16 @@ export default function GameScreen() {
     return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
   };
 
+  const onCollision = useCallback(() => {
+    console.log('Collision detected. Game over.');
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
+    }
+    setTimeout(() => {
+      endGame();
+    }, 80);
+  }, [endGame]);
+
   const gameStep = useCallback((dt: number) => {
     const h = dims.h;
     const w = dims.w;
@@ -166,10 +171,7 @@ export default function GameScreen() {
     if (toastYRef.current + toastHeight > ground) {
       toastYRef.current = ground - toastHeight;
       velYRef.current = 0;
-      // Hitting ground counts as collision
-      if (!invincible) {
-        handleCollision();
-      }
+      onCollision();
     }
     if (toastYRef.current < ceiling) {
       toastYRef.current = ceiling;
@@ -204,44 +206,15 @@ export default function GameScreen() {
       const bottomRect = { x: ob.x, y: ob.gapY + ob.gapSize / 2, w: ob.width, h: h - (ob.gapY + ob.gapSize / 2) };
       const collided = collideRect(tx, ty, tw, th, topRect.x, topRect.y, topRect.w, topRect.h) ||
         collideRect(tx, ty, tw, th, bottomRect.x, bottomRect.y, bottomRect.w, bottomRect.h);
-      if (collided && !invincible) {
-        handleCollision();
+      if (collided) {
+        onCollision();
         break;
       }
     }
 
     // trigger visual update for sprites
     setTick(t => (t + 1) % 1000);
-  }, [dims.h, dims.w, invincible]);
-
-  const handleCollision = useCallback(() => {
-    setLives(prev => {
-      const next = prev - 1;
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
-      }
-      if (next <= 0) {
-        // end game
-        setTimeout(() => {
-          endGame();
-        }, 80);
-      } else {
-        // brief invincibility and blink
-        setInvincible(true);
-        let t = 0;
-        const blinkTimer = setInterval(() => {
-          t += 1;
-          setBlink(b => !b);
-          if (t >= 10) {
-            clearInterval(blinkTimer);
-            setBlink(false);
-            setInvincible(false);
-          }
-        }, 120);
-      }
-      return next;
-    });
-  }, [endGame]);
+  }, [dims.h, dims.w, onCollision, spawnObstacle]);
 
   const loop = useCallback((ts: number) => {
     if (!running) return;
@@ -271,7 +244,7 @@ export default function GameScreen() {
 
   return (
     <View style={styles.container} onLayout={onLayout}>
-      <HUD score={score} lives={lives} highScore={highScore ?? undefined} />
+      <HUD score={score} highScore={highScore ?? undefined} />
       <Pressable
         onPress={flap}
         style={{ display: 'contents' }}
@@ -286,7 +259,6 @@ export default function GameScreen() {
             y={toastYRef.current}
             width={toastWidth}
             height={toastHeight}
-            blinking={blink}
           />
           {/* Obstacles */}
           {obstaclesRef.current.map(pair => {

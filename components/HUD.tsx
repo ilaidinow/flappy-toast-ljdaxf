@@ -1,17 +1,13 @@
 
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '../styles/commonStyles';
-import { Ionicons } from '@expo/vector-icons';
 
 interface HUDProps {
   score: number;
-  lives: number;
   highScore?: number | null;
 }
 
-export default function HUD({ score, lives, highScore }: HUDProps) {
-  const hearts = Array.from({ length: lives });
-
+export default function HUD({ score, highScore }: HUDProps) {
   return (
     <View style={styles.container}>
       <View style={styles.left}>
@@ -19,11 +15,6 @@ export default function HUD({ score, lives, highScore }: HUDProps) {
         {typeof highScore === 'number' && (
           <Text style={styles.highScore}>Best: {highScore}</Text>
         )}
-      </View>
-      <View style={styles.right}>
-        {hearts.map((_, idx) => (
-          <Ionicons key={idx} name="heart" size={24} color={colors.heart} style={{ marginLeft: 6 }} />
-        ))}
       </View>
     </View>
   );
@@ -36,17 +27,13 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     position: 'absolute',
     top: 8,
     zIndex: 10,
   },
   left: {
     flexDirection: 'column',
-  },
-  right: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   score: {
     fontFamily: 'Baloo2_700Bold',
